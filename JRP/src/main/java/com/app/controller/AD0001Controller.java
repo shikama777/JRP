@@ -1,10 +1,18 @@
 package com.app.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,8 +23,10 @@ import com.app.constant.ActionName;
 import com.app.dto.ResponseDto;
 import com.app.dto.AD0001.AD0001CreateDto;
 import com.app.dto.AD0001.AD0001DeleteDto;
+import com.app.dto.AD0001.AD0001DownloadDto;
 import com.app.dto.AD0001.AD0001Dto;
 import com.app.dto.AD0001.AD0001UpdateDto;
+import com.app.logic.AD0001Logic;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
@@ -28,6 +38,14 @@ public class AD0001Controller {
 	
 	@Autowired
 	private Firestore firestore;
+	
+	@Autowired
+	private AD0001Logic logic;
+	
+	@Value("${gcs.bucket.name}")
+    private String bucketName;
+
+    private static final String BLOB_NAME_TEMPLATE = "/chatHistory_%d.md";
 
 	@GetMapping(ActionName.DEFAULT)
 	public List<AD0001Dto> getAD0001() {
@@ -39,6 +57,11 @@ public class AD0001Controller {
 			List<QueryDocumentSnapshot> documents = aaa.get().getDocuments();
 			
 			for (QueryDocumentSnapshot document : documents) {
+				if (document.getId().equals("base")) {
+					// コレクション削除防止用
+					continue;
+				}
+
 				AD0001Dto dto = document.toObject(AD0001Dto.class);
 				dto.setId(document.getId()); // ドキュメントIDをセット
 				dtoList.add(dto);
@@ -111,5 +134,28 @@ public class AD0001Controller {
         response.setSuccess(true);
         return response;
 
+	}
+	
+	@PostMapping(ActionName.DOWNLOAD)
+	public ResponseEntity<InputStreamResource> delete(@RequestBody AD0001DownloadDto dto) {
+		
+		File tempFile;
+		InputStreamResource  resource;
+
+		// chatHistory.md ファイルをダウンロードする
+		try {
+			tempFile = logic.downloadChatHistory(dto);
+			resource = new InputStreamResource(new FileInputStream(tempFile));
+			
+			return ResponseEntity.ok()
+	                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=chatHistory.md")
+	                .contentType(MediaType.TEXT_PLAIN)
+	                .contentLength(tempFile.length())
+	                .body(resource);} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+        return ResponseEntity.status(500).body(null);
 	}
 }

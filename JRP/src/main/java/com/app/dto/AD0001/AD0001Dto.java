@@ -9,4 +9,8 @@ public class AD0001Dto {
 	private String spreadsheet_id;
 	private String history_id;
 	private String line_id;
+	
+	public String getName() {
+		return name.substring(0, name.length() - 2);
+	}
 }

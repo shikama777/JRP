@@ -7,10 +7,8 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.constant.ActionName;
 import com.app.dto.AD0001.AD0001DownloadDto;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Bucket;
@@ -25,7 +23,6 @@ public class AD0001Logic {
 
     private static final String BLOB_NAME_TEMPLATE = "/chatHistory_%d.md";
 
-    @GetMapping(ActionName.DOWNLOAD)
     public  File downloadChatHistory(AD0001DownloadDto dto) throws IOException {
     	
     	String name = dto.getName();

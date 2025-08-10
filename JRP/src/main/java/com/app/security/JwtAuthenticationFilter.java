@@ -49,7 +49,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		            }
 		            // tokenの検証と認証
 		            Jwt decodedJWT = jwtUtils.verifyToken(xAuthToken);
-		            String username = decodedJWT.getClaim("username").toString();
+		            String userId = decodedJWT.getClaim("userId").toString();
 		            
 		            List<String> rolesList =  decodedJWT.getClaim("roles");
 		            List<GrantedAuthority> roles = new ArrayList<>();
@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 						roles.add(new SimpleGrantedAuthority(role));
 					}
 
-		            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, null, roles));
+		            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userId, null, roles));
 		        
 		            filterChain.doFilter(request, response);
 				}

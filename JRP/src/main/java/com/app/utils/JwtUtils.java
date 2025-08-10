@@ -24,7 +24,7 @@ public class JwtUtils {
 	@Autowired
 	private JwtDecoder jwtDecoder;
 	
-	public String generateToken(String username, List<GrantedAuthority> authorities) {
+	public String generateToken(String userId, List<GrantedAuthority> authorities) {
 		
 		Instant now = Instant.now();
 		
@@ -37,7 +37,7 @@ public class JwtUtils {
 		
 		JwtClaimsSet claims = JwtClaimsSet.builder()
 				.issuer("test")
-				.claim("username", username)
+				.claim("userId", userId)
 				.claim("roles", roles) // ユーザーのロールを設定
 				.issuedAt(now)
 				.expiresAt(now.plus(30, ChronoUnit.MINUTES))

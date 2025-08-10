@@ -45,8 +45,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     	String redirectUri = "";
 
     	OAuth2User user = (OAuth2User) authentication.getPrincipal();
-    	
-        String username = user.getName();
         
         String email = user.getAttribute("email");
     
@@ -62,6 +60,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 			    }
 	        	
 	        	OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+	        	
+	        	String userId = querySnapshot .getDocuments().get(0).getId();
 	        	
 	        	// 既存の権限 + 新しいロールを追加
 	            List<GrantedAuthority> authorities = new ArrayList<>(oAuth2User.getAuthorities());
@@ -79,7 +79,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 					redirectUri = "DEV";
 	            }
 	            
-	            String jwt = jwtUtils.generateToken(username, authorities);
+	            String jwt = jwtUtils.generateToken(userId, authorities);
 	        	
 		        ResponseCookie cookie = ResponseCookie.from("x-auth-token", jwt)
 		        	    .httpOnly(true)

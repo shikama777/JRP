@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,9 +31,11 @@ public class ST0001Controller {
 	private Firestore firestore;
 
 	@GetMapping(ActionName.DEFAULT)
-	public List<ST0001Dto> getAD0001() {
-		ApiFuture<QuerySnapshot> aaa = firestore.collection("motivation")
-				.document( "NNFx28crvQsiGzbSHnqR")
+	public List<ST0001Dto> getAD0001(Authentication authentication) {
+		
+		String id = authentication.getName();
+		ApiFuture<QuerySnapshot> data = firestore.collection("motivation")
+				.document(id)
 				.collection(CollectionName.MOTIVATION_ITEMS)
 				.orderBy("order")
 				.get();
@@ -40,7 +43,7 @@ public class ST0001Controller {
 		List<ST0001Dto> dtoList = new ArrayList<>();
 		
 		try {
-			List<QueryDocumentSnapshot> documents = aaa.get().getDocuments();
+			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
 			
 			for (QueryDocumentSnapshot document : documents) {
 				if (document.getId().equals("base")) {
@@ -64,7 +67,9 @@ public class ST0001Controller {
 	}
 	
 	@PostMapping(ActionName.UPDATE)
-	public ResponseDto update(@RequestBody List<ST0001UpdateDto> dtoList) {		
+	public ResponseDto update(Authentication authentication, @RequestBody List<ST0001UpdateDto> dtoList) {
+		String id = authentication.getName();
+
 		try {
 			for (ST0001UpdateDto item : dtoList) {
 				if (item.getId() == null || item.getId().isEmpty()) {
@@ -77,13 +82,13 @@ public class ST0001Controller {
 
 					// 新規行の追加処理
 					firestore.collection("motivation")
-					.document("NNFx28crvQsiGzbSHnqR")
+					.document(id)
 					.collection(CollectionName.MOTIVATION_ITEMS)
 					.add(addDto)
 					.get();
 				} else if (item.isChanged())  {
 					firestore.collection("motivation")
-							.document("NNFx28crvQsiGzbSHnqR")
+							.document(id)
 							.collection(CollectionName.MOTIVATION_ITEMS)
 							.document(item.getId())
 							.update(
@@ -96,7 +101,7 @@ public class ST0001Controller {
 				} else if (item.isDeleted()) {
                     // 削除処理
                     firestore.collection("motivation")
-                            .document("NNFx28crvQsiGzbSHnqR")
+                            .document(id)
                             .collection(CollectionName.MOTIVATION_ITEMS)
                             .document(item.getId())
                             .delete()

@@ -26,7 +26,8 @@ public class AD0001Logic {
     public  File downloadChatHistory(AD0001DownloadDto dto) throws IOException {
     	
     	String name = dto.getName();
-    	String historyPath = name + BLOB_NAME_TEMPLATE;
+    	String docId = dto.getId();
+    	String historyPath = docId + BLOB_NAME_TEMPLATE;
         Storage storage = StorageOptions.getDefaultInstance().getService();
    
         Bucket bucket = storage.get(bucketName);

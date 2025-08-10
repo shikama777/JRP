@@ -1,6 +1,7 @@
 package com.app.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.servlet.FilterChain;
@@ -49,9 +50,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		            // tokenの検証と認証
 		            Jwt decodedJWT = jwtUtils.verifyToken(xAuthToken);
 		            String username = decodedJWT.getClaim("username").toString();
-		            List<GrantedAuthority> role = List.of(new SimpleGrantedAuthority("ROLE_" +decodedJWT.getClaim("role").toString()));
+		            
+		            List<String> rolesList =  decodedJWT.getClaim("roles");
+		            List<GrantedAuthority> roles = new ArrayList<>();
+					for (String role : rolesList) {
+						roles.add(new SimpleGrantedAuthority(role));
+					}
 
-		            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, null, role));
+		            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(username, null, roles));
 		        
 		            filterChain.doFilter(request, response);
 				}

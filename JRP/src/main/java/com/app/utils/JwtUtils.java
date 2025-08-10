@@ -2,8 +2,11 @@ package com.app.utils;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -21,14 +24,21 @@ public class JwtUtils {
 	@Autowired
 	private JwtDecoder jwtDecoder;
 	
-	public String generateToken(String username) {
+	public String generateToken(String username, List<GrantedAuthority> authorities) {
 		
 		Instant now = Instant.now();
+		
+		List<String> roles = new ArrayList<>();
+		for (GrantedAuthority authority : authorities) {
+			if (authority.getAuthority().startsWith("ROLE_")) {
+				roles.add(authority.getAuthority());
+			}
+        }
 		
 		JwtClaimsSet claims = JwtClaimsSet.builder()
 				.issuer("test")
 				.claim("username", username)
-				.claim("role", "ROLE_USER") // ユーザーのロールを設定
+				.claim("roles", roles) // ユーザーのロールを設定
 				.issuedAt(now)
 				.expiresAt(now.plus(30, ChronoUnit.MINUTES))
 				.build();

@@ -50,16 +50,14 @@ public class AD0001Controller {
 	@Value("${gcs.bucket.name}")
     private String bucketName;
 
-    private static final String BLOB_NAME_TEMPLATE = "/chatHistory_%d.md";
-
 	@GetMapping(ActionName.DEFAULT)
 	public List<AD0001Dto> getAD0001() {
-		ApiFuture<QuerySnapshot> aaa = firestore.collection("users").get();
+		ApiFuture<QuerySnapshot> data = firestore.collection("users").get();
 		
 		List<AD0001Dto> dtoList = new ArrayList<>();
 		
 		try {
-			List<QueryDocumentSnapshot> documents = aaa.get().getDocuments();
+			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
 			
 			for (QueryDocumentSnapshot document : documents) {
 				if (document.getId().equals("base")) {
@@ -131,7 +129,8 @@ public class AD0001Controller {
 				.document(dto.getId())
 				.update(
 						"name", dto.getName(),
-						"spreadsheet_id", dto.getSpreadsheet_id()
+						"spreadsheet_id", dto.getSpreadsheet_id(),
+						"gmail", dto.getGmail()
 					).get();
 		} catch (InterruptedException e) {
 			// TODO 自動生成された catch ブロック

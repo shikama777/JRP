@@ -18,6 +18,7 @@ import com.app.dto.ResponseDto;
 import com.app.dto.ST0001.ST0001CreateDto;
 import com.app.dto.ST0001.ST0001Dto;
 import com.app.dto.ST0001.ST0001UpdateDto;
+import com.app.logic.ST0001Logic;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
@@ -29,12 +30,15 @@ public class ST0001Controller {
 	
 	@Autowired
 	private Firestore firestore;
+	
+	@Autowired
+	private ST0001Logic st0001Logic;
 
 	@GetMapping(ActionName.DEFAULT)
 	public List<ST0001Dto> getAD0001(Authentication authentication) {
 		
 		String id = authentication.getName();
-		ApiFuture<QuerySnapshot> data = firestore.collection("motivation")
+		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.MOTIVATION)
 				.document(id)
 				.collection(CollectionName.MOTIVATION_ITEMS)
 				.orderBy("order")
@@ -120,6 +124,18 @@ public class ST0001Controller {
 		response.setSuccess(true);
 		response.setMessage("更新しました。");
 		return response;
+	}
+	
+	@PostMapping(ActionName.POST)
+	public ResponseDto post(Authentication authentication) throws InterruptedException {
+		String id = authentication.getName();
+
+		st0001Logic.createMotivationData(id);
+		ResponseDto response = new ResponseDto();
+		response.setSuccess(true);
+		response.setMessage("初期化しました。");
+		return response;
+		
 	}
 
 }

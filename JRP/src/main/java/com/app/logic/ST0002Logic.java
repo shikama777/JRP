@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.app.constant.CollectionName;
-import com.app.dto.ST0001.ST0001CreateDto;
+import com.app.dto.ST0002.ST0002CreateDto;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -23,7 +23,7 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
 @Component
-public class ST0001Logic {
+public class ST0002Logic {
 
 	@Autowired
 	private Firestore firestore;
@@ -40,15 +40,19 @@ public class ST0001Logic {
 	// 今はAD0101から呼び出し
 	public void createMotivation(String Id) {
 
-		List<ST0001CreateDto> dtoList = new ArrayList<>();
+		List<ST0002CreateDto> dtoList = new ArrayList<>();
 
 		CollectionReference collection = firestore.collection(CollectionName.MOTIVATION)
 				.document(Id)
 				.collection(CollectionName.MOTIVATION_ITEMS);
 
 		for (int i = 0; i < NEW_AGE_LIST.length; i++) {
-			ST0001CreateDto dto = new ST0001CreateDto();
-
+			ST0002CreateDto dto = new ST0002CreateDto();
+			dto.setAge(NEW_AGE_LIST[i]);
+			dto.setMotivation("0");
+			dto.setEvent("");
+			dto.setMind("");
+			dto.setOrder(i);
 
 			dtoList.add(dto);
 			collection.add(dto);

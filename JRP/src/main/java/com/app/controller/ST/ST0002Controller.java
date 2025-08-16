@@ -1,5 +1,6 @@
 package com.app.controller.ST;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -14,72 +15,49 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.constant.ActionName;
 import com.app.constant.CollectionName;
 import com.app.dto.ResponseDto;
-import com.app.dto.ST0001.ST0001Dto;
-import com.app.dto.ST0001.ST0001UpdateDto;
-import com.app.logic.ST0001Logic;
+import com.app.dto.ST0002.ST0002CreateDto;
+import com.app.dto.ST0002.ST0002Dto;
+import com.app.dto.ST0002.ST0002UpdateDto;
+import com.app.logic.ST0002Logic;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 
 @RestController
-@RequestMapping("/api/ST0001")
-public class ST0001Controller {
+@RequestMapping("/api/ST0002")
+public class ST0002Controller {
 	
 	@Autowired
 	private Firestore firestore;
 	
 	@Autowired
-	private ST0001Logic ST0001Logic;
+	private ST0002Logic ST0002Logic;
 
 	@GetMapping(ActionName.DEFAULT)
-	public ST0001Dto getAD0101(Authentication authentication) {
+	public List<ST0002Dto> getAD0101(Authentication authentication) {
 		
 		String id = authentication.getName();
-		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.KACHIKAN)
+		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.MOTIVATION)
 				.document(id)
-				.collection(CollectionName.KACHIKAN_ITEMS)
+				.collection(CollectionName.MOTIVATION_ITEMS)
+				.orderBy("order")
 				.get();
 		
-		ST0001Dto dto = new ST0001Dto();
+		List<ST0002Dto> dtoList = new ArrayList<>();
 		
 		try {
 			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
 			
 			for (QueryDocumentSnapshot document : documents) {
-				String[] dataList = new String[3];
-				switch (document.getString("id")) {
-					case "1":
-						dataList[0] = document.getString("data1");
-						dataList[1] = document.getString("data2");
-						dataList[2] = document.getString("data3");
-						dto.setData1(dataList);
-						break;
-					case "2":
-			            dataList[0] = document.getString("data1");
-			            dataList[1] = document.getString("data2");
-			            dataList[2] = document.getString("data3");
-			            dto.setData2(dataList);
-			            break;
-			        case "3":
-			            dataList[0] = document.getString("data1");
-			            dataList[1] = document.getString("data2");
-			            dataList[2] = document.getString("data3");
-			            dto.setData3(dataList);
-			            break;
-			        case "4":
-			            dataList[0] = document.getString("data1");
-			            dataList[1] = document.getString("data2");
-			            dataList[2] = document.getString("data3");
-			            dto.setData4(dataList);
-			            break;
-			        case "5":
-			            dataList[0] = document.getString("data1");
-			            dataList[1] = document.getString("data2");
-			            dataList[2] = document.getString("data3");
-			            dto.setData5(dataList);
-			            break;
+				if (document.getId().equals("base")) {
+					// コレクション削除防止用
+					continue;
 				}
+
+				ST0002Dto dto = document.toObject(ST0002Dto.class);
+				dto.setId(document.getId()); // ドキュメントIDをセット
+				dtoList.add(dto);
 			}
 		} catch (InterruptedException e) {
 			// TODO 自動生成された catch ブロック
@@ -89,18 +67,22 @@ public class ST0001Controller {
 			e.printStackTrace();
 		}
 	    
-		return dto;
+		return dtoList;
 	}
 	
 	@PostMapping(ActionName.UPDATE)
-	public ResponseDto update(Authentication authentication, @RequestBody List<ST0001UpdateDto> dtoList) {
+	public ResponseDto update(Authentication authentication, @RequestBody List<ST0002UpdateDto> dtoList) {
 		String id = authentication.getName();
 
 		try {
-			for (ST0001UpdateDto item : dtoList) {
+			for (ST0002UpdateDto item : dtoList) {
 				if (item.getId() == null || item.getId().isEmpty()) {
-					ST0001UpdateDto addDto = new ST0001UpdateDto();
-
+					ST0002CreateDto addDto = new ST0002CreateDto();
+					addDto.setAge(item.getAge());
+					addDto.setMotivation(item.getMotivation());
+					addDto.setEvent(item.getEvent());
+					addDto.setMind(item.getMind());
+					addDto.setOrder(item.getOrder());
 
 					// 新規行の追加処理
 					firestore.collection("motivation")
@@ -148,7 +130,7 @@ public class ST0001Controller {
 	public ResponseDto post(Authentication authentication) throws InterruptedException {
 		String id = authentication.getName();
 
-		ST0001Logic.createMotivationData(id);
+		ST0002Logic.createMotivationData(id);
 		ResponseDto response = new ResponseDto();
 		response.setSuccess(true);
 		response.setMessage("初期化しました。");

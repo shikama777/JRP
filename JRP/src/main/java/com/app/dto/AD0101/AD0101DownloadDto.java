@@ -1,9 +1,9 @@
-package com.app.dto.AD0001;
+package com.app.dto.AD0101;
 
 import lombok.Data;
 
 @Data
-public class AD0001DownloadDto {
+public class AD0101DownloadDto {
 	String name;
 	String id;
 	int downloadNo;

@@ -1,5 +1,10 @@
 package com.app.controller;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -17,8 +22,10 @@ import com.app.constant.CollectionName;
 import com.app.dto.ResponseDto;
 import com.app.dto.AD0002.AD0002Dto;
 import com.app.dto.AD0002.AD0002GetDto;
+import com.app.dto.AD0002.AD0002PostDto;
 import com.app.dto.AD0002.AD0002UpdateDto;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
@@ -31,6 +38,9 @@ public class AD0002Controller {
 	
 	@Value("${gcs.bucket.name}")
     private String bucketName;
+	
+	@Value("${line.bot.channelAccessToken}")
+	private String channelAccessToken;
 
 	@GetMapping(ActionName.DEFAULT)
 	public List<AD0002Dto> initializer() {
@@ -140,4 +150,68 @@ public class AD0002Controller {
 		
 		return response;
 	}
+	
+	@PostMapping(ActionName.POST)
+	public ResponseDto  post(@RequestBody AD0002PostDto dto) {
+		ResponseDto response = new ResponseDto();
+		
+		try {
+			DocumentReference document = firestore.collection("users").document(dto.getId());
+
+	        String userId = document.get().get().getString("line_id"); // 送り先の line_id
+
+			if (userId == null || userId.isEmpty()) {
+				return new ResponseDto() {
+					{
+						setSuccess(false);
+						setMessage("LINE IDが設定されていません。");
+					}
+				};
+			} else {
+
+				if (document.get().get().getString("history_id").equals("6")) {
+					document.update("history_id", "7");
+
+			        String messageText = "Javaからのテスト送信！";
+			
+			        String jsonPayload = """
+			            {
+			              "to": "%s",
+			              "messages": [
+			                {
+			                  "type": "text",
+			                  "text": "%s"
+			                }
+			              ]
+			            }
+			            """.formatted(userId, messageText);
+			
+			        HttpRequest request = HttpRequest.newBuilder()
+			            .uri(URI.create("https://api.line.me/v2/bot/message/push"))
+			            .header("Content-Type", "application/json")
+			            .header("Authorization", "Bearer " + channelAccessToken)
+			            .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
+			            .build();
+			
+			        HttpClient client = HttpClient.newHttpClient();
+			        client.send(request, HttpResponse.BodyHandlers.ofString());
+			        response.setMessage("メッセージを送信しました。");
+				} else if(Integer.parseInt(document.get().get().getString("history_id")) > 6) {
+					response.setMessage("ユーザーは既に次のステップに進んでます。");
+				}  else if(Integer.parseInt(document.get().get().getString("history_id")) < 6) {
+					response.setMessage("ユーザーは前のステップが完了していません。");
+				} else {
+					response.setMessage("ユーザーが存在しません。");
+				}
+			}
+		} catch (IOException | InterruptedException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+        return response;
+    }
 }

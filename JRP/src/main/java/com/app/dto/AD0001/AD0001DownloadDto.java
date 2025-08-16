@@ -6,6 +6,7 @@ import lombok.Data;
 public class AD0001DownloadDto {
 	String name;
 	String id;
+	int downloadNo;
 	
 	public void setName(String name) {
         this.name = name + "さん";

@@ -1,4 +1,4 @@
-package com.app.controller;
+package com.app.controller.AD;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,6 +27,7 @@ import com.app.dto.AD0101.AD0101DownloadDto;
 import com.app.dto.AD0101.AD0101Dto;
 import com.app.dto.AD0101.AD0101UpdateDto;
 import com.app.logic.AD0101Logic;
+import com.app.logic.ST0001Logic;
 import com.app.logic.ST0002Logic;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
@@ -44,6 +45,9 @@ public class AD0101Controller {
 	@Autowired
 	private AD0101Logic logic;
 
+	@Autowired
+	private ST0001Logic ST0001Logic;
+	
 	@Autowired
 	private ST0002Logic ST0002Logic;
 
@@ -93,6 +97,7 @@ public class AD0101Controller {
 		try {
 			DocumentReference documentReference = firestore.collection("users").add(dto).get();
 
+			ST0001Logic.createKachikan(documentReference.getId());
 			ST0002Logic.createMotivation(documentReference.getId());
 		} catch (InterruptedException e) {
 			// TODO 自動生成された catch ブロック
@@ -160,6 +165,7 @@ public class AD0101Controller {
 					.document(dto.getId())
 					.delete().get();
 
+			ST0001Logic.deleteKachikan(dto.getId());
 			ST0002Logic.deleteMotivation(dto.getId());
 		} catch (InterruptedException e) {
 			// TODO 自動生成された catch ブロック

@@ -1,4 +1,4 @@
-package com.app.controller;
+package com.app.controller.AD;
 
 import java.io.IOException;
 import java.net.URI;
@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,10 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.constant.ActionName;
 import com.app.constant.CollectionName;
 import com.app.dto.ResponseDto;
-import com.app.dto.AD0002.AD0002Dto;
+import com.app.dto.UserDto;
 import com.app.dto.AD0002.AD0002GetDto;
 import com.app.dto.AD0002.AD0002PostDto;
 import com.app.dto.AD0002.AD0002UpdateDto;
+import com.app.logic.AD0002Logic;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
@@ -32,9 +34,12 @@ import com.google.cloud.firestore.QuerySnapshot;
 
 @RestController
 @RequestMapping("/api/AD0002")
-public class AD0002Controller {
+public class AD0002Controller extends ADController {
 	@Autowired
 	private Firestore firestore;
+	
+	@Autowired
+	private AD0002Logic AD0002Logic;
 	
 	@Value("${gcs.bucket.name}")
     private String bucketName;
@@ -43,40 +48,14 @@ public class AD0002Controller {
 	private String channelAccessToken;
 
 	@GetMapping(ActionName.DEFAULT)
-	public List<AD0002Dto> initializer() {
-		ApiFuture<QuerySnapshot> data = firestore.collection("users").get();
-		
-		List<AD0002Dto> dtoList = new ArrayList<>();
-		
-		try {
-			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
-			
-			for (QueryDocumentSnapshot document : documents) {
-				if (document.getId().equals("base")) {
-					// コレクション削除防止用
-					continue;
-				}
-	
-				AD0002Dto dto = new AD0002Dto();
-				dto.setId(document.getId()); // ドキュメントIDをセット
-				dto.setName(document.getString("name")); // ドキュメントから名前を取得
-				dtoList.add(dto);
-			}
-		} catch (InterruptedException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
-		}
-	    
-		return dtoList;
+	public List<UserDto> initializer() {	    
+		return getUserList();
 	}
 	
 	@PostMapping(ActionName.GET)
-	public List<AD0002GetDto> getAD0002(@RequestBody AD0002Dto searchDto) {
+	public List<AD0002GetDto> getAD0002(@RequestBody UserDto userDto) {
 		
-		String id = searchDto.getId();
+		String id = userDto.getId();
 		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.MOTIVATION)
 				.document(id)
 				.collection(CollectionName.MOTIVATION_ITEMS)
@@ -152,8 +131,11 @@ public class AD0002Controller {
 	}
 	
 	@PostMapping(ActionName.POST)
-	public ResponseDto  post(@RequestBody AD0002PostDto dto) {
+	public ResponseDto  post(Authentication authentication, @RequestBody AD0002PostDto dto) {
+		String id = authentication.getName();
 		ResponseDto response = new ResponseDto();
+		
+		AD0002Logic.createMotivationData(id);
 		
 		try {
 			DocumentReference document = firestore.collection("users").document(dto.getId());

@@ -1,9 +1,10 @@
-package com.app.dto.ST0001;
+package com.app.dto.AD0001;
 
 import lombok.Data;
 
 @Data
-public class ST0001UpdateDto {
+public class AD0001GetDto {
+	String id;
 	String[] data1;
 	String[] data2;
 	String[] data3;

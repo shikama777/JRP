@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
 import com.app.dto.AD0101.AD0101DownloadDto;
 import com.google.cloud.storage.Blob;
@@ -16,7 +16,7 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-@RestController
+@Component
 public class AD0101Logic {
 
 	@Value("${gcs.bucket.name}")

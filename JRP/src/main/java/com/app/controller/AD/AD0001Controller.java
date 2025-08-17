@@ -1,4 +1,4 @@
-package com.app.controller.ST;
+package com.app.controller.AD;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -14,31 +14,37 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.constant.ActionName;
 import com.app.constant.CollectionName;
 import com.app.dto.ResponseDto;
-import com.app.dto.ST0001.ST0001Dto;
-import com.app.dto.ST0001.ST0001UpdateDto;
+import com.app.dto.UserDto;
+import com.app.dto.AD0001.AD0001GetDto;
+import com.app.dto.AD0001.AD0001PostDto;
+import com.app.dto.AD0001.AD0001UpdateDto;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 
 @RestController
-@RequestMapping("/api/ST0001")
-public class ST0001Controller {
-	
+@RequestMapping("/api/AD0001")
+public class AD0001Controller extends ADController {
 	@Autowired
 	private Firestore firestore;
-
+	
 	@GetMapping(ActionName.DEFAULT)
-	public ST0001Dto get(Authentication authentication) {
+	public List<UserDto> initializer() {	    
+		return getUserList();
+	}
+	
+	@PostMapping(ActionName.GET)
+	public AD0001GetDto get(@RequestBody UserDto userDto) {
 		
-		String id = authentication.getName();
+		String id = userDto.getId();
 		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.KACHIKAN)
 				.document(id)
 				.collection(CollectionName.KACHIKAN_ITEMS)
 				.get();
 		
-		ST0001Dto dto = new ST0001Dto();
+		AD0001GetDto dto = new AD0001GetDto();
 		
 		try {
 			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
@@ -90,93 +96,55 @@ public class ST0001Controller {
 	}
 	
 	@PostMapping(ActionName.UPDATE)
-	public ResponseDto update(Authentication authentication, @RequestBody ST0001UpdateDto dto) {
-		String id = authentication.getName();
-		CollectionReference data = firestore.collection(CollectionName.KACHIKAN)
-				.document(id)
-				.collection(CollectionName.KACHIKAN_ITEMS);
+	public ResponseDto  update(Authentication authentication, @RequestBody AD0001UpdateDto dto) {
+		ResponseDto response = new ResponseDto();
+		String id = dto.getId();
 
 		try {
-				data
-				.whereEqualTo("id", 1)
-				.get()
-				.get()
-				.getDocuments()
-				.get(0)
-				.getReference()
-				.update(
-						"data1", dto.getData1()[0],
-						"data2", dto.getData1()[1],
-						"data3", dto.getData1()[2]
-						)
-				.get();
-				
-				data
-				.whereEqualTo("id", 2)
-				.get()
-				.get()
-				.getDocuments()
-				.get(0)
-				.getReference()
-				.update(
-						"data1", dto.getData2()[0],
-						"data2", dto.getData2()[1],
-						"data3", dto.getData2()[2]
-						)
-				.get();
-				
-				data
-				.whereEqualTo("id", 3)
-				.get()
-				.get()
-				.getDocuments()
-				.get(0)
-				.getReference()
-				.update(
-						"data1", dto.getData3()[0],
-						"data2", dto.getData3()[1],
-						"data3", dto.getData3()[2]
-						)
-				.get();
-				
-				data
-				.whereEqualTo("id", 4)
-				.get()
-				.get()
-				.getDocuments()
-				.get(0)
-				.getReference()
-				.update(
-						"data1", dto.getData4()[0],
-						"data2", dto.getData4()[1],
-						"data3", dto.getData4()[2]
-						)
-				.get();
-				
-				data
-				.whereEqualTo("id", 5)
-				.get()
-				.get()
-				.getDocuments()
-				.get(0)
-				.getReference()
-				.update(
-						"data1", dto.getData5()[0],
-						"data2", dto.getData5()[1],
-						"data3", dto.getData5()[2]
-						)
-				.get();
+			// Retrieve the single document in the COMMENT collection
+	        ApiFuture<QuerySnapshot> query = firestore.collection(CollectionName.KACHIKAN)
+	                .document(id)
+	                .collection(CollectionName.COMMENT)
+	                .get();
+
+	        List<QueryDocumentSnapshot> documents = query.get().getDocuments();
+
+	        if (documents.size() == 1) {
+	            // Get the document ID
+	            String documentId = documents.get(0).getId();
+
+	            // Perform the update
+	            firestore.collection(CollectionName.KACHIKAN)
+	                    .document(id)
+	                    .collection(CollectionName.COMMENT)
+	                    .document(documentId)
+	                    .update(
+								"comment", dto.getComment()
+	                    )
+	                    .get();
+
+	            
+	            response.setSuccess(true);
+	        } else {
+	           response.setMessage("Expected exactly one document, but found: " + documents.size());
+	        }
 		} catch (InterruptedException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
+		
+		return response;
+    }
+
+	@PostMapping(ActionName.POST)
+	public ResponseDto  post(Authentication authentication, @RequestBody AD0001PostDto dto) {
+		String id = authentication.getName();
+		DocumentReference document = firestore.collection(CollectionName.USERS).document(dto.getId());
+		document.update("history", "1");
 
 		ResponseDto response = new ResponseDto();
-		response.setSuccess(true);
-		response.setMessage("更新しました。");
-		return response;
-	}
+        return response;
+    }
+
 }

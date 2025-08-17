@@ -125,17 +125,5 @@ public class ST0002Controller {
 		response.setMessage("更新しました。");
 		return response;
 	}
-	
-	@PostMapping(ActionName.POST)
-	public ResponseDto post(Authentication authentication) throws InterruptedException {
-		String id = authentication.getName();
-
-		ST0002Logic.createMotivationData(id);
-		ResponseDto response = new ResponseDto();
-		response.setSuccess(true);
-		response.setMessage("初期化しました。");
-		return response;
-		
-	}
 
 }

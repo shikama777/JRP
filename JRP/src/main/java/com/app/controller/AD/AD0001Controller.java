@@ -18,6 +18,7 @@ import com.app.dto.UserDto;
 import com.app.dto.AD0001.AD0001GetDto;
 import com.app.dto.AD0001.AD0001PostDto;
 import com.app.dto.AD0001.AD0001UpdateDto;
+import com.app.logic.AD0001Logic;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
@@ -29,6 +30,9 @@ import com.google.cloud.firestore.QuerySnapshot;
 public class AD0001Controller extends ADController {
 	@Autowired
 	private Firestore firestore;
+	
+	@Autowired
+	private AD0001Logic AD0001Logic;
 	
 	@GetMapping(ActionName.DEFAULT)
 	public List<UserDto> initializer() {	    
@@ -42,6 +46,11 @@ public class AD0001Controller extends ADController {
 		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.KACHIKAN)
 				.document(id)
 				.collection(CollectionName.KACHIKAN_ITEMS)
+				.get();
+		
+		ApiFuture<QuerySnapshot> comment = firestore.collection(CollectionName.KACHIKAN)
+				.document(id)
+				.collection(CollectionName.COMMENT)
 				.get();
 		
 		AD0001GetDto dto = new AD0001GetDto();
@@ -83,6 +92,7 @@ public class AD0001Controller extends ADController {
 			            dto.setData5(dataList);
 			            break;
 				}
+				dto.setComment(comment.get().getDocuments().get(0).getString("comment"));
 			}
 		} catch (InterruptedException e) {
 			// TODO 自動生成された catch ブロック
@@ -110,18 +120,14 @@ public class AD0001Controller extends ADController {
 	        List<QueryDocumentSnapshot> documents = query.get().getDocuments();
 
 	        if (documents.size() == 1) {
-	            // Get the document ID
-	            String documentId = documents.get(0).getId();
 
-	            // Perform the update
-	            firestore.collection(CollectionName.KACHIKAN)
-	                    .document(id)
-	                    .collection(CollectionName.COMMENT)
-	                    .document(documentId)
-	                    .update(
-								"comment", dto.getComment()
-	                    )
-	                    .get();
+	            documents
+		            .get(0)
+		            .getReference()
+	                .update(
+							"comment", dto.getComment()
+	                )
+	                .get();
 
 	            
 	            response.setSuccess(true);
@@ -138,10 +144,12 @@ public class AD0001Controller extends ADController {
     }
 
 	@PostMapping(ActionName.POST)
-	public ResponseDto  post(Authentication authentication, @RequestBody AD0001PostDto dto) {
-		String id = authentication.getName();
-		DocumentReference document = firestore.collection(CollectionName.USERS).document(dto.getId());
-		document.update("history", "1");
+	public ResponseDto  post(Authentication authentication, @RequestBody AD0001PostDto dto) throws InterruptedException, ExecutionException {
+		String id = dto.getId();
+		DocumentReference document = firestore.collection(CollectionName.USERS).document(id);
+		document.update("history_id", "1");
+		
+		AD0001Logic.createKachikanData(id, document.get().get().getString("name"));
 
 		ResponseDto response = new ResponseDto();
         return response;

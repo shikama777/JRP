@@ -104,17 +104,13 @@ public class AD0002Controller extends ADController {
 
 	        if (documents.size() == 1) {
 	            // Get the document ID
-	            String documentId = documents.get(0).getId();
-
-	            // Perform the update
-	            firestore.collection(CollectionName.MOTIVATION)
-	                    .document(id)
-	                    .collection(CollectionName.COMMENT)
-	                    .document(documentId)
-	                    .update(
-								"comment", dto.getComment()
-	                    )
-	                    .get();
+	            documents
+	            	.get(0)
+            		.getReference()
+                    .update(
+							"comment", dto.getComment()
+                    )
+                    .get();
 
 	            
 	            response.setSuccess(true);
@@ -132,13 +128,11 @@ public class AD0002Controller extends ADController {
 	
 	@PostMapping(ActionName.POST)
 	public ResponseDto  post(Authentication authentication, @RequestBody AD0002PostDto dto) {
-		String id = authentication.getName();
+		String id = dto.getId();
 		ResponseDto response = new ResponseDto();
 		
-		AD0002Logic.createMotivationData(id);
-		
 		try {
-			DocumentReference document = firestore.collection("users").document(dto.getId());
+			DocumentReference document = firestore.collection("users").document(id);
 
 	        String userId = document.get().get().getString("line_id"); // 送り先の line_id
 
@@ -153,6 +147,7 @@ public class AD0002Controller extends ADController {
 
 				if (document.get().get().getString("history_id").equals("6")) {
 					document.update("history_id", "7");
+					AD0002Logic.createMotivationData(id);
 
 			        String messageText = "Javaからのテスト送信！";
 			

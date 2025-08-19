@@ -69,7 +69,7 @@ public class AD0101Logic {
 	private static String downloadChatHistory1(String name, String historyPath, Bucket bucket) {
 		String chatHistoryText = "";
 
-		for (int i = 1; i <= 4; i++) {
+		for (int i = 1; i <= 5; i++) {
 			String blobName = String.format(historyPath, i);
 			Blob blob = bucket.get(blobName);
 
@@ -82,47 +82,38 @@ public class AD0101Logic {
 
 			if (i == 1) {
 				chatHistoryText += "### 会話履歴\n"
-						+ "けいと:\n\n"
+						+ "けいと:\n"
 						+ "こんにちは、" + name + "\n"
 						+ "まずは「自分にとっての幸せとは」というテーマで価値観を深探りしていきましょう 。\n"
 						+ "まずはあなたにとっての幸せとは何か1〜3個あげてください。\n\n"
-						+ "例:\n"
-						+ "- お金をかせぐこと\n"
-						+ "- 週末にちょっと贅沢して、好きなお店でごはんを食べる時間\n"
-						+ "- 来年はこんなことしたいな、って目標や夢がある状態\n\n"
 						+ textData;
 			} else if (i == 2) {
 				chatHistoryText += "\n\n__次のテーマへの移行__\n\n"
-						+ "けいと:\n\n"
+						+ "けいと:\n"
 						+ name + "ありがとうございます。\n"
 						+ "次は「何を大切にして生きてるのか」というテーマで価値観を深探りしていきましょう 。\n"
 						+ "まずはあなたは何を大切にして生きてるのか1〜3個あげてください\n\n"
 						+ textData;
 			} else if (i == 3) {
 				chatHistoryText += "\n\n__次のテーマへの移行__\n\n"
-						+ "けいと:\n\n"
+						+ "けいと:\n"
 						+ name + "ありがとうございます。\n"
 						+ "次は「なぜ今その選択をしているのか」というテーマで価値観を深探りしていきましょう 。\n"
+						+ "まずは、あなたが今選んでいる仕事・学び・生き方など人生における選択の理由を1〜3個をあげてください。\n\n"
 						+ textData;
 			} else if (i == 4) {
 				chatHistoryText += "\n\n__次のテーマへの移行__\n\n"
-						+ "けいと:\n\n"
+						+ "けいと:\n"
 						+ name + "ありがとうございます。\n"
 						+ "次は「社会に不満を感じることは」というテーマで価値観を深探りしていきましょう 。\n"
-						+ "\nまずはあなたが社会に不満を感じることを1〜3個あげてください。\n\n"
-						+ "例：\n"
-						+ "- 周りの人が冷たい\n"
-						+"- 結果がすべてみたいな風潮があること\n"
+						+ "まずはあなたが社会に不満を感じることを1〜3個あげてください。\n\n"
 						+ textData;
 			} else if (i == 5) {
 				chatHistoryText += "\n\n__次のテーマへの移行__\n\n"
-						+ "けいと:\n\n"
+						+ "けいと:\n"
 						+ name + "ありがとうございます。\n"
 						+ "次は「尊敬する人、友人、好きなキャラクターは誰?」というテーマで価値観を深掘りしていきましょう 。\n"
 						+ "あなたが尊敬する人、友人、好きなキャラクターを1〜3人あげてください。\n\n"
-						+ "例：\n"
-						+ "- 母\n"
-						+"- 友人のA\n"
 						+ textData;
 			}
 		}

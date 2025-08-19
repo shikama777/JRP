@@ -39,7 +39,12 @@ public class ST0001Controller {
 				.get();
 		
 		ST0001Dto dto = new ST0001Dto();
-		
+
+		ApiFuture<QuerySnapshot> comment = firestore.collection(CollectionName.KACHIKAN)
+				.document(id)
+				.collection(CollectionName.COMMENT)
+				.get();
+
 		try {
 			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
 			
@@ -77,6 +82,8 @@ public class ST0001Controller {
 			            dto.setData5(dataList);
 			            break;
 				}
+				
+				dto.setComment(comment.get().getDocuments().get(0).getString("comment"));
 			}
 		} catch (InterruptedException e) {
 			// TODO 自動生成された catch ブロック

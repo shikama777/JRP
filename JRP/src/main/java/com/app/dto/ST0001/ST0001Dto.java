@@ -9,4 +9,5 @@ public class ST0001Dto {
 	String[] data3;
 	String[] data4;
 	String[] data5;
+	String comment;
 }

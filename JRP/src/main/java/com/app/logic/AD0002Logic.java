@@ -20,13 +20,13 @@ import com.google.cloud.storage.StorageOptions;
 
 @Component
 public class AD0002Logic {
-	
+
 	@Autowired
 	private Firestore firestore;
-	
+
 	@Value("${gcs.bucket.name}")
-    private String bucketName;
-	
+	private String bucketName;
+
 	private static final String BLOB_NAME_TEMPLATE = "/motivationHistory.md";
 
 	public void createMotivationData(String id) {
@@ -39,24 +39,25 @@ public class AD0002Logic {
 		try {
 			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
 			StringBuilder mdContent = new StringBuilder();
-			
+
 			for (QueryDocumentSnapshot document : documents) {
 				mdContent.append("# 年齢: ").append(document.getString("age")).append("\n");
-	            mdContent.append("### ポジティブ度: ").append("\n").append(document.getString("motivation")).append("\n");
-	            mdContent.append("### ネガティブ度: ").append("\n").append(100 - Integer.parseInt(document.getString("motivation"))).append("\n");
-	            mdContent.append("### 出来事・事実").append("\n").append(document.getString("event")).append("\n");
-	            mdContent.append("### 当時の感情・思考 ").append("\n").append(document.getString("mind")).append("\n");
+				mdContent.append("### ポジティブ度: ").append("\n").append(document.getString("motivation")).append("\n");
+				mdContent.append("### ネガティブ度: ").append("\n")
+						.append(100 - Integer.parseInt(document.getString("motivation"))).append("\n");
+				mdContent.append("### 出来事・事実").append("\n").append(document.getString("event")).append("\n");
+				mdContent.append("### 当時の感情・思考 ").append("\n").append(document.getString("mind")).append("\n");
 			}
 			// Convert content to bytes
-	        byte[] contentBytes = mdContent.toString().getBytes(StandardCharsets.UTF_8);
+			byte[] contentBytes = mdContent.toString().getBytes(StandardCharsets.UTF_8);
 
-	        String fileName = id + BLOB_NAME_TEMPLATE;
+			String fileName = id + BLOB_NAME_TEMPLATE;
 
-	        Storage storage = StorageOptions.getDefaultInstance().getService();
-	        BlobId blobId = BlobId.of(bucketName, fileName);
-	        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/markdown").build();
+			Storage storage = StorageOptions.getDefaultInstance().getService();
+			BlobId blobId = BlobId.of(bucketName, fileName);
+			BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/markdown").build();
 
-	        storage.create(blobInfo, contentBytes);
+			storage.create(blobInfo, contentBytes);
 		} catch (InterruptedException e) {
 			throw new RuntimeException("Motivation data creation failed", e);
 		} catch (ExecutionException e) {

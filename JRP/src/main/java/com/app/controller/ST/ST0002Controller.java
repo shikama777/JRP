@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.app.constant.ActionName;
 import com.app.constant.CollectionName;
+import com.app.dto.CommentDto;
 import com.app.dto.ResponseDto;
 import com.app.dto.ST0002.ST0002CreateDto;
 import com.app.dto.ST0002.ST0002Dto;
 import com.app.dto.ST0002.ST0002UpdateDto;
-import com.app.logic.ST0002Logic;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
@@ -30,9 +30,6 @@ public class ST0002Controller {
 	
 	@Autowired
 	private Firestore firestore;
-	
-	@Autowired
-	private ST0002Logic ST0002Logic;
 
 	@GetMapping(ActionName.DEFAULT)
 	public List<ST0002Dto> getAD0101(Authentication authentication) {
@@ -69,7 +66,29 @@ public class ST0002Controller {
 	    
 		return dtoList;
 	}
-	
+
+	@PostMapping(ActionName.GET)
+	public CommentDto getComment(Authentication authentication) {
+		String userId = authentication.getName();
+		ApiFuture<QuerySnapshot> comment = firestore.collection(CollectionName.MOTIVATION)
+				.document(userId)
+				.collection(CollectionName.COMMENT)
+				.get();
+
+		CommentDto dto = new CommentDto();
+
+		try {
+			List<QueryDocumentSnapshot> documents = comment.get().getDocuments();
+			dto.setComment(documents.get(0).getString("comment"));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+
+		return dto;
+	}
+
 	@PostMapping(ActionName.UPDATE)
 	public ResponseDto update(Authentication authentication, @RequestBody List<ST0002UpdateDto> dtoList) {
 		String id = authentication.getName();

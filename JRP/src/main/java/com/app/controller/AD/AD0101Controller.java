@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.app.constant.ActionName;
+import com.app.constant.CollectionName;
 import com.app.dto.ResponseDto;
 import com.app.dto.AD0101.AD0101CreateDto;
 import com.app.dto.AD0101.AD0101DeleteDto;
@@ -56,7 +57,7 @@ public class AD0101Controller {
 
 	@GetMapping(ActionName.DEFAULT)
 	public List<AD0101Dto> getAD0101() {
-		ApiFuture<QuerySnapshot> data = firestore.collection("users").get();
+		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.USERS).get();
 
 		List<AD0101Dto> dtoList = new ArrayList<>();
 
@@ -95,7 +96,7 @@ public class AD0101Controller {
 		}
 
 		try {
-			DocumentReference documentReference = firestore.collection("users").add(dto).get();
+			DocumentReference documentReference = firestore.collection(CollectionName.USERS).add(dto).get();
 
 			ST0001Logic.createKachikan(documentReference.getId());
 			ST0002Logic.createMotivation(documentReference.getId());

@@ -10,4 +10,5 @@ public class AD0001GetDto {
 	String[] data3;
 	String[] data4;
 	String[] data5;
+	String Comment;
 }

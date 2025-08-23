@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class CollectionName {
 	public static final String USERS = "users";
+	public static final String KACHIKAN = "kachikan";
+	public static final String KACHIKAN_ITEMS = "kachikan_items";
 	public static final String MOTIVATION = "motivation";
 	public static final String MOTIVATION_ITEMS = "motivation_items";
 	public static final String COMMENT = "comment";

@@ -1,9 +1,9 @@
-package com.app.dto.AD0001;
+package com.app.dto.AD0101;
 
 import lombok.Data;
 
 @Data
-public class AD0001CreateDto {
+public class AD0101CreateDto {
 	private String name;
 	private String spreadsheet_id;
 	private String history_id;

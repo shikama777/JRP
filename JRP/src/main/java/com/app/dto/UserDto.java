@@ -1,9 +1,9 @@
-package com.app.dto.AD0002;
+package com.app.dto;
 
 import lombok.Data;
 
 @Data
-public class AD0002Dto {
+public class UserDto {
 	private String id;
 	private String name;
 }

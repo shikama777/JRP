@@ -1,99 +1,69 @@
 package com.app.logic;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
 
-import com.app.dto.AD0001.AD0001DownloadDto;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
+import com.app.constant.CollectionName;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
-@RestController
+@Component
 public class AD0001Logic {
+	
+	@Autowired
+	private Firestore firestore;
 
-    @Value("${gcs.bucket.name}")
-    private String bucketName;
+	@Value("${gcs.bucket.name}")
+	private String bucketName;
 
-    private static final String BLOB_NAME_TEMPLATE = "/chatHistory_%d.md";
+	private static final String BLOB_NAME_TEMPLATE = "/chatHistory_%s.md";
 
-    public  File downloadChatHistory(AD0001DownloadDto dto) throws IOException {
-    	
-    	String name = dto.getName();
-    	String docId = dto.getId();
-    	String historyPath = docId + BLOB_NAME_TEMPLATE;
-        Storage storage = StorageOptions.getDefaultInstance().getService();
-   
-        Bucket bucket = storage.get(bucketName);
+	public void createKachikanData(String id, String userName) {
+		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.KACHIKAN)
+				.document(id)
+				.collection(CollectionName.KACHIKAN_ITEMS)
+				.get();
 
-        File tempFile = File.createTempFile("chatHistory", ".md");
+		try {
+			List<QueryDocumentSnapshot> documents = data.get().getDocuments();
 
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(tempFile, false), StandardCharsets.UTF_8))) {
+			for (QueryDocumentSnapshot document : documents) {
+				StringBuilder mdContent = new StringBuilder();
+				mdContent.append("これまでの会話履歴をみてけいととして返信してください\n");
+				mdContent.append("けいとからの次の返信文のみ送ってください\n\n");
+				mdContent.append("### 会話履歴\n\n");
+				mdContent.append(userName).append(":\n");
+				mdContent.append("- ").append(document.getString("data1")).append("\n");
+				mdContent.append("- ").append(document.getString("data2")).append("\n");
+				mdContent.append("- ").append(document.getString("data3")).append("\n");
+				// Convert content to bytes
+				byte[] contentBytes = mdContent.toString().getBytes(StandardCharsets.UTF_8);
+	
+				String fileName = id + BLOB_NAME_TEMPLATE.formatted(document.getLong("id").toString());
+	
+				Storage storage = StorageOptions.getDefaultInstance().getService();
+				BlobId blobId = BlobId.of(bucketName, fileName);
+				BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/markdown").build();
+	
+				storage.create(blobInfo, contentBytes);
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Motivation data creation failed", e);
+		} catch (ExecutionException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+	}
 
-            for (int i = 1; i <= 4; i++) {
-                String blobName = String.format(historyPath, i);
-                Blob blob = bucket.get(blobName);
-
-                if (blob == null || !blob.exists()) {
-                    continue;
-                }
-
-                String textData = new String(blob.getContent(), StandardCharsets.UTF_8);
-                String chatHistoryText = extractConversation(textData);
-
-                if (i == 1) {
-                    chatHistoryText = "### 会話履歴\n"
-                            + "けいと:\n\n"
-                            + "こんにちは、" + name + "\n"
-                            + "まずは「自分にとっての幸せとは」というテーマで価値観を深探りしていきましょう 。\n"
-                            + "まずはあなたにとっての幸せとは何か1〜3個あげてください。\n\n"
-                            + "例:\n"
-                            + "- お金をかせぐこと\n"
-                            + "- 週末にちょっと贅沢して、好きなお店でごはんを食べる時間\n"
-                            + "- 来年はこんなことしたいな、って目標や夢がある状態\n\n"
-                            + chatHistoryText;
-                } else if (i == 2) {
-                    chatHistoryText = "\n\n__次のテーマへの移行__\n\n"
-                            + "けいと:\n\n"
-                            + name + "ありがとうございます。\n"
-                            + "次は「何を大切にして生きてるのか」というテーマで価値観を深探りしていきましょう 。\n"
-                            + "まずはあなたは何を大切にして生きてるのか1〜3個あげてください\n\n"
-                            + chatHistoryText;
-                } else if (i == 3) {
-                    chatHistoryText = "\n\n__次のテーマへの移行__\n\n"
-                            + "けいと:\n\n"
-                            + name + "ありがとうございます。\n"
-                            + "次は「なぜ今その選択をしているのか」というテーマで価値観を深探りしていきましょう 。\n"
-                            + chatHistoryText;
-                } else if (i == 4) {
-                    chatHistoryText = "\n\n__次のテーマへの移行__\n\n"
-                            + "けいと:\n\n"
-                            + name + "ありがとうございます。\n"
-                            + "次は「社会に不満を感じることは」というテーマで価値観を深探りしていきましょう 。\n"
-                            + chatHistoryText;
-                }
-
-                writer.write(chatHistoryText);
-            }
-        }
-
-        return tempFile;
-    }
-
-    private static String extractConversation(String text) {
-        String marker = "### 会話履歴";
-        int index = text.indexOf(marker);
-        if (index >= 0) {
-            return text.substring(index + marker.length()).stripLeading();
-        } else {
-            return "";
-        }
-    }
 }

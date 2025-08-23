@@ -4,9 +4,8 @@ import lombok.Data;
 
 @Data
 public class ST0001CreateDto {
-	private String age;
-	private String motivation;
-	private String event;
-	private String mind;
-	private int order;
+	int id;
+	String data1;
+	String data2;
+	String data3;
 }

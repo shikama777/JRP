@@ -5,45 +5,54 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.app.constant.CollectionName;
 import com.app.dto.CommentDto;
-import com.app.dto.ST0001.ST0001CreateDto;
+import com.app.dto.ST0002.ST0002CreateDto;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 
 @Component
-public class ST0001Logic {
+public class ST0002Logic {
 
 	@Autowired
 	private Firestore firestore;
+	
+	@Value("${gcs.bucket.name}")
+    private String bucketName;
+
+	private final String[] NEW_AGE_LIST = { "0～5歳", "6歳", "7歳", "8歳", "9歳", "10歳",
+			"11歳", "12歳", "13歳", "14歳", "15歳", "16歳",
+			"17歳", "18歳" };
 
 	// 今はAD0101から呼び出し
-	public void createKachikan(String Id) {
+	public void createMotivation(String Id) {
 
-		List<ST0001CreateDto> dtoList = new ArrayList<>();
+		List<ST0002CreateDto> dtoList = new ArrayList<>();
 
-		CollectionReference collection = firestore.collection(CollectionName.KACHIKAN)
+		CollectionReference collection = firestore.collection(CollectionName.MOTIVATION)
 				.document(Id)
-				.collection(CollectionName.KACHIKAN_ITEMS);
+				.collection(CollectionName.MOTIVATION_ITEMS);
 		
-		CollectionReference commentCollection = firestore.collection(CollectionName.KACHIKAN)
+		CollectionReference commentCollection = firestore.collection(CollectionName.MOTIVATION)
 				.document(Id)
 				.collection(CollectionName.COMMENT);
 
-		for (int i = 1; i < 6; i++) {
-			ST0001CreateDto dto = new ST0001CreateDto();
-			dto.setId(i);
-			dto.setData1("");
-			dto.setData2("");
-			dto.setData3("");
+		for (int i = 0; i < NEW_AGE_LIST.length; i++) {
+			ST0002CreateDto dto = new ST0002CreateDto();
+			dto.setAge(NEW_AGE_LIST[i]);
+			dto.setMotivation("0");
+			dto.setEvent("");
+			dto.setMind("");
+			dto.setOrder(i);
 
 			dtoList.add(dto);
 			collection.add(dto);
-		}
+		};
 		
 		CommentDto commentDto = new CommentDto();
 		commentDto.setComment("");
@@ -52,24 +61,24 @@ public class ST0001Logic {
 	}
 
 	// 今はAD0101から呼び出し
-	public void deleteKachikan(String Id) {
+	public void deleteMotivation(String Id) {
 		try {
-			DocumentReference motivationRef = firestore.collection(CollectionName.KACHIKAN).document(Id);
+			DocumentReference motivationRef = firestore.collection(CollectionName.MOTIVATION).document(Id);
 
 			List<QueryDocumentSnapshot> motivationItems = motivationRef
-					.collection(CollectionName.KACHIKAN_ITEMS)
+					.collection(CollectionName.MOTIVATION_ITEMS)
 					.get()
 					.get()
 					.getDocuments();
 			
 			List<QueryDocumentSnapshot> commentItems = motivationRef
-					.collection(CollectionName.KACHIKAN_ITEMS)
+					.collection(CollectionName.COMMENT)
 					.get()
 					.get()
 					.getDocuments();
 
 			for (QueryDocumentSnapshot item : motivationItems) {
-				motivationRef.collection(CollectionName.KACHIKAN_ITEMS)
+				motivationRef.collection(CollectionName.MOTIVATION_ITEMS)
 						.document(item.getId())
 						.delete()
 						.get();

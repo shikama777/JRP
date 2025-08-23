@@ -24,7 +24,25 @@ public class JwtUtils {
 	@Autowired
 	private JwtDecoder jwtDecoder;
 	
-	public String generateToken(String userId, List<GrantedAuthority> authorities) {
+	public String generateRefreshToken(String userId) {
+		
+		Instant now = Instant.now();
+		
+		JwtClaimsSet claims = JwtClaimsSet.builder()
+				.issuer("test")
+				.claim("typ", "refresh")
+				.claim("userId", userId)
+				.issuedAt(now)
+				.expiresAt(now.plus(7, ChronoUnit.DAYS))
+				.build();
+		
+		JwsHeader header = JwsHeader.with(() -> "HS256") // アルゴリズム
+	            .build();
+		
+		return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+	}
+	
+	public String generateAuthenticationToken(String userId, List<GrantedAuthority> authorities) {
 		
 		Instant now = Instant.now();
 		
@@ -37,11 +55,11 @@ public class JwtUtils {
 		
 		JwtClaimsSet claims = JwtClaimsSet.builder()
 				.issuer("test")
-				.claim("typ", "access")
+				.claim("typ", "auth")
 				.claim("userId", userId)
 				.claim("roles", roles) // ユーザーのロールを設定
 				.issuedAt(now)
-				.expiresAt(now.plus(1, ChronoUnit.DAYS))
+				.expiresAt(now.plus(5, ChronoUnit.MINUTES))
 				.build();
 		
 		JwsHeader header = JwsHeader.with(() -> "HS256") // アルゴリズム

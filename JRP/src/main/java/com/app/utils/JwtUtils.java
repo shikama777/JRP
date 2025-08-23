@@ -37,10 +37,11 @@ public class JwtUtils {
 		
 		JwtClaimsSet claims = JwtClaimsSet.builder()
 				.issuer("test")
+				.claim("typ", "access")
 				.claim("userId", userId)
 				.claim("roles", roles) // ユーザーのロールを設定
 				.issuedAt(now)
-				.expiresAt(now.plus(30, ChronoUnit.MINUTES))
+				.expiresAt(now.plus(1, ChronoUnit.DAYS))
 				.build();
 		
 		JwsHeader header = JwsHeader.with(() -> "HS256") // アルゴリズム

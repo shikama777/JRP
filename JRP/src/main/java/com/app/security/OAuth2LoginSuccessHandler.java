@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -32,11 +33,14 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     
     @Autowired
 	private Firestore firestore;
+    
+    @Value("${frontend.url}")
+	private String frontendUrl;
 
     public OAuth2LoginSuccessHandler(JwtUtils jwtUtils) {
         this.jwtUtils = jwtUtils;
     }
-
+    
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -54,6 +58,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 		try {
 				QuerySnapshot querySnapshot = userList.get();
 				if (querySnapshot.isEmpty()) {
+					
 			        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
 			                "No matching user found for the provided email");
 			        return;
@@ -68,15 +73,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 	            if (querySnapshot .getDocuments().get(0).get("role").equals("1")) {
                     // ユーザーが管理者の場合、ROLE_ADMINを追加
 	            	authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-	            	redirectUri = "AD";
+	            	redirectUri = "/AD";
 	            } else if (querySnapshot .getDocuments().get(0).get("role").equals("2")) {
 					// ユーザーが一般ユーザーの場合、ROLE_USERを追加
 					authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-					redirectUri = "ST";
+					redirectUri = "/ST";
 				} else if (querySnapshot .getDocuments().get(0).get("role").equals("0")) {
 					authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
 					authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-					redirectUri = "DEV";
+					redirectUri = "/DEV";
 	            }
 	            
 	            String jwt = jwtUtils.generateToken(userId, authorities);
@@ -97,6 +102,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 		}
 		
         // 必要であればリダイレクト先を指定
-        response.sendRedirect("http://localhost:5173/" + redirectUri);
+        response.sendRedirect(frontendUrl + redirectUri);
     }
 }

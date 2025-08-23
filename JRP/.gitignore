@@ -4,6 +4,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+keito-life-project-877bce615cf2.json
+
 ### STS ###
 .apt_generated
 .classpath

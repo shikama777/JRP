@@ -38,8 +38,10 @@ public class AuthenticationController {
 	private String frontendUrl;
 	
 	@GetMapping("/api/refresh")
-    public ResponseDto refresh(@CookieValue(name="REFRESH_TOKEN", required=false) String refreshToken,
+    public ResponseDto refresh(@CookieValue(name="__session", required=false) String refreshToken,
 			HttpServletRequest request, HttpServletResponse response) throws IOException {
+		
+		System.out.println("Refresh token from cookie: " + refreshToken);
 		
 		String redirectUri = "";
 		
@@ -50,6 +52,9 @@ public class AuthenticationController {
 			Jwt decodedJWT = jwtUtils.verifyToken(refreshToken);
 			
 			String userId = decodedJWT.getClaimAsString("userId");
+			
+			System.out.println("Decoded JWT: " + decodedJWT);
+			System.out.println("User ID from token: " + userId);
 			
 			DocumentSnapshot user = firestore.collection("users").document(userId).get().get();
 

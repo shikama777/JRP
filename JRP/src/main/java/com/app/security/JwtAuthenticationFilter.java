@@ -30,7 +30,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	         throws ServletException, IOException {
 
 	     String uri = request.getRequestURI();
-	     if (uri.startsWith("/login/oauth2/") || uri.startsWith("/oauth2/authorization") || uri.equals("/api/refresh")) {
+	     System.out.println("URI: " + uri);
+	     if (uri.startsWith("/login/oauth2/") || uri.startsWith("/oauth2/authorization") || uri.startsWith("/api/login/oauth2/") || uri.startsWith("/api/oauth2/authorization")  || uri.startsWith("/login") || uri.equals("/api/refresh")) {
+	    	 	 System.out.println("Skipping JWT check for URI: " + uri);
 	         filterChain.doFilter(request, response);
 	         return;
 	     }

@@ -33,11 +33,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     
     @Value("${frontend.url}")
 	private String frontendUrl;
-    
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
+    	
+    	System.out.println("OAuth2LoginSuccessHandler invoked");
 
     	OAuth2User user = (OAuth2User) authentication.getPrincipal();
         
@@ -59,7 +61,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 	            
 	            String jwt = jwtUtils.generateRefreshToken(userId);
 	        	
-		        ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", jwt)
+		        ResponseCookie cookie = ResponseCookie.from("__session", jwt)
 		        	    .httpOnly(true)
 		        	    .secure(true)
 		        	    .sameSite("None")

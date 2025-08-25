@@ -53,9 +53,6 @@ public class AuthenticationController {
 			
 			String userId = decodedJWT.getClaimAsString("userId");
 			
-			System.out.println("Decoded JWT: " + decodedJWT);
-			System.out.println("User ID from token: " + userId);
-			
 			DocumentSnapshot user = firestore.collection("users").document(userId).get().get();
 
 			// ユーザーが存在しない場合、401エラーを返す

@@ -24,17 +24,34 @@ import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 
+import lombok.Data;
+
 @RestController
 @RequestMapping("/api/ST0002")
-public class ST0002Controller {
+public class ST0002Controller extends STController {
 	
 	@Autowired
 	private Firestore firestore;
+	
+	@Data
+	public class ST0002Response {
+		private boolean inComplete;
+		List<ST0002Dto> list;
+	}
 
 	@GetMapping(ActionName.DEFAULT)
-	public List<ST0002Dto> getAD0101(Authentication authentication) {
+	public ST0002Response initializer(Authentication authentication) {
+		
+		ST0002Response response = new ST0002Response();
 		
 		String id = authentication.getName();
+		
+		if (getHistoryId(id) == null || getHistoryId(id).isEmpty() || Integer.parseInt(getHistoryId(id)) < 7 ){
+			response.setInComplete(true);
+		} else {
+			response.setInComplete(false);
+		}
+		
 		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.MOTIVATION)
 				.document(id)
 				.collection(CollectionName.MOTIVATION_ITEMS)
@@ -63,8 +80,10 @@ public class ST0002Controller {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
+		
+		response.setList(dtoList);
 	    
-		return dtoList;
+		return response;
 	}
 
 	@PostMapping(ActionName.GET)

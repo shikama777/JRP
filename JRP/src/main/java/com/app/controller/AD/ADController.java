@@ -2,9 +2,11 @@ package com.app.controller.AD;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 
 import com.app.dto.UserDto;
 import com.google.api.core.ApiFuture;
@@ -15,6 +17,9 @@ import com.google.cloud.firestore.QuerySnapshot;
 public class ADController {
 	@Autowired
 	private Firestore firestore;
+	
+	@Autowired
+	private MessageSource messageSource;
 	
 	protected List<UserDto> getUserList() {
 		ApiFuture<QuerySnapshot> data = firestore.collection("users").get();
@@ -45,5 +50,8 @@ public class ADController {
 		
 		return dtoList;
 	}
-
+	
+	protected String getMessage(String code) {
+		return messageSource.getMessage(code, null, Locale.JAPAN);
+	}
 }

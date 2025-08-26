@@ -46,7 +46,7 @@ public class ST0002Controller extends STController {
 		
 		String id = authentication.getName();
 		
-		if (getHistoryId(id) == null || getHistoryId(id).isEmpty() || Integer.parseInt(getHistoryId(id)) < 7 ){
+		if (getHistoryId(id) == null || getHistoryId(id).isEmpty() || Integer.parseInt(getHistoryId(id)) < 6 ){
 			response.setInComplete(true);
 		} else {
 			response.setInComplete(false);

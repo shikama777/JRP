@@ -1,10 +1,5 @@
 package com.app.controller.AD;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -134,9 +129,9 @@ public class AD0002Controller extends ADController {
 		try {
 			DocumentReference document = firestore.collection("users").document(id);
 
-	        String userId = document.get().get().getString("line_id"); // 送り先の line_id
+	        String lineId = document.get().get().getString("line_id"); // 送り先の line_id
 
-			if (userId == null || userId.isEmpty()) {
+			if (lineId == null || lineId.isEmpty()) {
 				return new ResponseDto() {
 					{
 						setSuccess(false);
@@ -144,35 +139,13 @@ public class AD0002Controller extends ADController {
 					}
 				};
 			} else {
-
 				if (document.get().get().getString("history_id").equals("6")) {
-					document.update("history_id", "7");
+					// document.update("history_id", "7");
 					AD0002Logic.createMotivationData(id);
-
-			        String messageText = "Javaからのテスト送信！";
-			
-			        String jsonPayload = """
-			            {
-			              "to": "%s",
-			              "messages": [
-			                {
-			                  "type": "text",
-			                  "text": "%s"
-			                }
-			              ]
-			            }
-			            """.formatted(userId, messageText);
-			
-			        HttpRequest request = HttpRequest.newBuilder()
-			            .uri(URI.create("https://api.line.me/v2/bot/message/push"))
-			            .header("Content-Type", "application/json")
-			            .header("Authorization", "Bearer " + channelAccessToken)
-			            .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-			            .build();
-			
-			        HttpClient client = HttpClient.newHttpClient();
-			        client.send(request, HttpResponse.BodyHandlers.ofString());
-			        response.setMessage("メッセージを送信しました。");
+					
+					AD0002Logic.sendMessage(id, lineId);
+					
+					response.setMessage("メッセージを送信しました。");
 				} else if(Integer.parseInt(document.get().get().getString("history_id")) > 6) {
 					response.setMessage("ユーザーは既に次のステップに進んでます。");
 				}  else if(Integer.parseInt(document.get().get().getString("history_id")) < 6) {
@@ -181,7 +154,7 @@ public class AD0002Controller extends ADController {
 					response.setMessage("ユーザーが存在しません。");
 				}
 			}
-		} catch (IOException | InterruptedException e) {
+		} catch (InterruptedException e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		} catch (ExecutionException e) {

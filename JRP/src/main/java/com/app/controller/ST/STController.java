@@ -1,6 +1,7 @@
 package com.app.controller.ST;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -10,6 +11,9 @@ public class STController {
 	
 	@Autowired
 	private Firestore firestore;
+	
+	@Autowired
+	private MessageSource messageSource;
 	
 	protected String getHistoryId(String userId) {
 		ApiFuture<DocumentSnapshot>  data = firestore.collection("users").document(userId).get();

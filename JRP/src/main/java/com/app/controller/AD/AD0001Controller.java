@@ -146,12 +146,20 @@ public class AD0001Controller extends ADController {
 	@PostMapping(ActionName.POST)
 	public ResponseDto  post(Authentication authentication, @RequestBody AD0001PostDto dto) throws InterruptedException, ExecutionException {
 		String id = dto.getId();
+		ResponseDto response = new ResponseDto();
+		
+		if (getHistoryId(id) == null || getHistoryId(id).isEmpty() || Integer.parseInt(getHistoryId(id)) > 0 ){
+			response.setSuccess(false);
+			response.setMessage(getMessage("message.alreadyNextStep"));
+			return response;
+		}
+		
 		DocumentReference document = firestore.collection(CollectionName.USERS).document(id);
 		document.update("history_id", "1");
 		
 		AD0001Logic.createKachikanData(id, document.get().get().getString("name"));
 
-		ResponseDto response = new ResponseDto();
+		
         return response;
     }
 

@@ -10,6 +10,7 @@ import org.springframework.context.MessageSource;
 
 import com.app.dto.UserDto;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
@@ -49,6 +50,25 @@ public class ADController {
 		}
 		
 		return dtoList;
+	}
+	
+	protected String getHistoryId(String userId) {
+		ApiFuture<DocumentSnapshot>  data = firestore.collection("users").document(userId).get();
+		String historyId = "";
+		
+		try {
+		    DocumentSnapshot document = data.get();
+		    if (document.exists()) {
+		        // history_id フィールドを String として取得
+		        historyId = document.getString("history_id");
+		    } else {
+		        System.out.println("指定した documentId のドキュメントは存在しません。");
+		    }
+		} catch (Exception e) {
+		    e.printStackTrace();
+		}
+
+		return historyId;
 	}
 	
 	protected String getMessage(String code) {

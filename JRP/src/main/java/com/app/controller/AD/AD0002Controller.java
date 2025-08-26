@@ -147,7 +147,7 @@ public class AD0002Controller extends ADController {
 					
 					response.setMessage("メッセージを送信しました。");
 				} else if(Integer.parseInt(document.get().get().getString("history_id")) > 6) {
-					response.setMessage("ユーザーは既に次のステップに進んでます。");
+					response.setMessage(getMessage("message.alreadyNextStep"));
 				}  else if(Integer.parseInt(document.get().get().getString("history_id")) < 6) {
 					response.setMessage("ユーザーは前のステップが完了していません。");
 				} else {

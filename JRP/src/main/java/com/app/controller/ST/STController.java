@@ -1,5 +1,7 @@
 package com.app.controller.ST;
 
+import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 
@@ -13,7 +15,7 @@ public class STController {
 	private Firestore firestore;
 	
 	@Autowired
-	private MessageSource messageSource;
+	MessageSource messageSource;
 	
 	protected String getHistoryId(String userId) {
 		ApiFuture<DocumentSnapshot>  data = firestore.collection("users").document(userId).get();
@@ -32,6 +34,10 @@ public class STController {
 		}
 
 		return historyId;
+	}
+	
+	protected String getMessage(String code) {
+		return messageSource.getMessage(code, null, Locale.JAPAN);
 	}
 
 }

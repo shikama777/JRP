@@ -38,7 +38,7 @@ public class GoogleCloudStorageLogic {
 		BlobId blobId = BlobId.of(bucketName, fileName);
 		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("text/markdown").build();
 
-		storage.create(blobInfo, contentBytes);
+		storage.create(blobInfo, contentBytes, Storage.BlobTargetOption.doesNotExist());
 	}
 	
 	public String loadFile (String blobName) {

@@ -8,15 +8,16 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import com.app.constant.CollectionName;
-import com.app.utils.MessageUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Firestore;
@@ -50,9 +51,8 @@ public class AD0002Logic {
 	private GoogleCloudStorageLogic googleCloudStorageLogic;
 	
 	@Autowired
-	private MessageUtils messageUtils;
+	private MessageSource messageSource;
 	
-
 	public void createMotivationData(String id) {
 		ApiFuture<QuerySnapshot> data = firestore.collection(CollectionName.MOTIVATION)
 				.document(id)
@@ -92,19 +92,7 @@ public class AD0002Logic {
 	
 	public void sendMessage(String id, String lineId) {
 		
-	        String messageText = messageUtils.getMessage("ST0002.lineFirstMessage");
-	
-	        String jsonPayload = """
-	            {
-	              "to": "%s",
-	              "messages": [
-	                {
-	                  "type": "text",
-	                  "text": "%s"
-	                }
-	              ]
-	            }
-	            """;
+	        String messageText = messageSource.getMessage("ST0002.lineFirstMessage", null, Locale.JAPAN);
 
 	        try {		
 		        HttpClient client = HttpClient.newHttpClient();

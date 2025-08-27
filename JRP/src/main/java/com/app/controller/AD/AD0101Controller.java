@@ -184,7 +184,7 @@ public class AD0101Controller {
 	}
 
 	@PostMapping(ActionName.DOWNLOAD)
-	public ResponseEntity<InputStreamResource> delete(@RequestBody AD0101DownloadDto dto) {
+	public ResponseEntity<InputStreamResource> download(@RequestBody AD0101DownloadDto dto) {
 
 		File tempFile;
 		InputStreamResource resource;

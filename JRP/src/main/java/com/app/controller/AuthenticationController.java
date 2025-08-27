@@ -41,8 +41,6 @@ public class AuthenticationController {
     public ResponseDto refresh(@CookieValue(name="__session", required=false) String refreshToken,
 			HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
-		System.out.println("Refresh token from cookie: " + refreshToken);
-		
 		String redirectUri = "";
 		
 		ResponseDto responseDto = new ResponseDto();

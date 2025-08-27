@@ -1,2 +1,3 @@
 /mvnw text eol=lf
+mvnw chmod=+x
 *.cmd text eol=crlf
